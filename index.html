@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeCraftHub: Your Learning Management Platform</title>
+    <style>
+      :root {
+        --primary: #8B5CF6;
+        --primary-dark: #7C3AED;
+        --primary-light: #EDE9FE;
+        --success: #F59E0B;
+        --success-dark: #D97706;
+        --danger: #EF4444;
+        --danger-dark: #DC2626;
+        --bg: #F5F3FF;
+        --surface: #ffffff;
+        --text: #1F2937;
+        --muted: #6B7280;
+        --border: #E5E7EB;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-lg: 0 10px 25px rgba(139, 92, 246, 0.12);
+        --radius: 12px;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: #fff;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+      }
+      .header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .header p {
+        margin-top: 0.4rem;
+        font-size: 0.95rem;
+        opacity: 0.9;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+
+      .panel {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .panel h2 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+      .field { display: flex; flex-direction: column; gap: 0.3rem; }
+      .field.full { grid-column: 1 / -1; }
+      label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .req { color: var(--danger); }
+
+      input, textarea, select {
+        font: inherit;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--text);
+        transition: border-color 0.2s, box-shadow 0.2s;
+        width: 100%;
+      }
+      textarea { min-height: 80px; resize: vertical; }
+      input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+      .field.invalid input,
+      .field.invalid textarea,
+      .field.invalid select { border-color: var(--danger); }
+      .err-text {
+        font-size: 0.75rem;
+        color: var(--danger);
+        min-height: 1em;
+      }
+
+      .actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap; }
+
+      button {
+        font: inherit;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        padding: 0.65rem 1.4rem;
+        cursor: pointer;
+        transition: transform 0.1s, background 0.2s, box-shadow 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      button:active { transform: translateY(1px); }
+      button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+      .btn-primary { background: var(--primary); color: #fff; }
+      .btn-primary:hover:not(:disabled) { background: var(--primary-dark); box-shadow: var(--shadow-lg); }
+      .btn-success { background: var(--success); color: #fff; }
+      .btn-success:hover:not(:disabled) { background: var(--success-dark); }
+      .btn-danger { background: var(--danger); color: #fff; }
+      .btn-danger:hover:not(:disabled) { background: var(--danger-dark); }
+      .btn-ghost {
+        background: transparent;
+        color: var(--primary-dark);
+        border: 1px solid var(--border);
+      }
+      .btn-ghost:hover:not(:disabled) { background: var(--primary-light); border-color: var(--primary); }
+      .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+
+      /* Status badges */
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .badge.not-started { background: #F3F4F6; color: #6B7280; }
+      .badge.in-progress { background: #FEF3C7; color: var(--success-dark); }
+      .badge.completed { background: #DCFCE7; color: #15803D; }
+
+      /* Table */
+      .table-wrap { overflow-x: auto; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+      th, td {
+        text-align: left;
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        background: #FAFAFE;
+      }
+      tbody tr { transition: background 0.15s; }
+      tbody tr:hover { background: var(--primary-light); }
+      td.name { font-weight: 600; color: var(--primary-dark); }
+      td.desc { color: var(--muted); max-width: 280px; }
+      td.actions { white-space: nowrap; }
+      td.actions button + button { margin-left: 0.4rem; }
+
+      .empty {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: var(--muted);
+      }
+      .empty h3 { font-size: 1.1rem; margin-bottom: 0.4rem; color: var(--text); }
+
+      /* Spinner */
+      .spinner {
+        width: 18px; height: 18px;
+        border: 2px solid rgba(255,255,255,0.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: inline-block;
+      }
+      .spinner.dark {
+        border-color: var(--border);
+        border-top-color: var(--primary);
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .loading-overlay {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--muted);
+      }
+
+      /* Toast / messages */
+      .toast {
+        position: fixed;
+        top: 1.25rem;
+        right: 1.25rem;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        max-width: 360px;
+      }
+      .toast-item {
+        padding: 0.85rem 1.1rem;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 500;
+        box-shadow: var(--shadow-lg);
+        animation: slideIn 0.25s ease;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      .toast-item.success { background: var(--success-dark); }
+      .toast-item.error { background: var(--danger-dark); }
+      .toast-item.info { background: var(--primary-dark); }
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+
+      /* Modal */
+      .modal-backdrop {
+        position: fixed; inset: 0;
+        background: rgba(31, 41, 55, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 900;
+        padding: 1rem;
+      }
+      .modal-backdrop.open { display: flex; }
+      .modal {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: modalIn 0.2s ease;
+      }
+      @keyframes modalIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      .modal-head {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .modal-head h3 { color: var(--primary-dark); font-size: 1.1rem; }
+      .modal-close {
+        background: transparent;
+        color: var(--muted);
+        font-size: 1.4rem;
+        padding: 0 0.4rem;
+        line-height: 1;
+      }
+      .modal-close:hover { color: var(--danger); }
+      .modal-body { padding: 1.5rem; }
+
+      @media (max-width: 640px) {
+        .header h1 { font-size: 1.4rem; }
+        .actions { flex-direction: column; }
+        .actions button { width: 100%; justify-content: center; }
+        td.actions { white-space: normal; }
+        td.actions button { width: 100%; justify-content: center; margin: 0 0 0.3rem 0 !important; }
+      }
+    </style>
+    <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
+</head>
+  <body>
+    <header class="header">
+      <h1>CodeCraftHub: Your Learning Management Platform</h1>
+      <p>Plan, track, and master your learning journey</p>
+    </header>
+
+    <main class="container">
+      <!-- Add Course Form -->
+      <section class="panel" id="addPanel">
+        <h2>Add New Course</h2>
+        <form id="courseForm" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="f-name">Course Name <span class="req">*</span></label>
+              <input type="text" id="f-name" name="name" placeholder="e.g. Intro to Python" />
+              <span class="err-text" data-err="name"></span>
+            </div>
+            <div class="field">
+              <label for="f-date">Target Date <span class="req">*</span></label>
+              <input type="date" id="f-date" name="target_date" />
+              <span class="err-text" data-err="target_date"></span>
+            </div>
+            <div class="field">
+              <label for="f-status">Status <span class="req">*</span></label>
+              <select id="f-status" name="status">
+                <option value="">Select status…</option>
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+              <span class="err-text" data-err="status"></span>
+            </div>
+            <div class="field full">
+              <label for="f-desc">Description <span class="req">*</span></label>
+              <textarea id="f-desc" name="description" placeholder="Briefly describe what this course covers"></textarea>
+              <span class="err-text" data-err="description"></span>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn-primary" id="submitBtn">Add Course</button>
+            <button type="reset" class="btn-ghost">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Course List -->
+      <section class="panel">
+        <h2>Course List <span id="countLabel" style="font-weight:400;color:var(--muted);font-size:0.9rem;"></span></h2>
+        <div id="courseList">
+          <div class="loading-overlay"><span class="spinner dark"></span> Loading courses…</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Edit Modal -->
+    <div class="modal-backdrop" id="editModal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3>Edit Course</h3>
+          <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="editForm" novalidate>
+            <input type="hidden" id="e-id" />
+            <div class="form-grid">
+              <div class="field full">
+                <label for="e-name">Course Name <span class="req">*</span></label>
+                <input type="text" id="e-name" name="name" />
+                <span class="err-text" data-err="ename"></span>
+              </div>
+              <div class="field full">
+                <label for="e-desc">Description <span class="req">*</span></label>
+                <textarea id="e-desc" name="description"></textarea>
+                <span class="err-text" data-err="edesc"></span>
+              </div>
+              <div class="field">
+                <label for="e-date">Target Date <span class="req">*</span></label>
+                <input type="date" id="e-date" name="target_date" />
+                <span class="err-text" data-err="edate"></span>
+              </div>
+              <div class="field">
+                <label for="e-status">Status <span class="req">*</span></label>
+                <select id="e-status" name="status">
+                  <option value="Not Started">Not Started</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+                <span class="err-text" data-err="estatus"></span>
+              </div>
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn-success" id="saveBtn">Save Changes</button>
+              <button type="button" class="btn-ghost" id="cancelBtn">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const API_URL = 'http://localhost:5000/api/courses';
+
+      const $ = (s) => document.querySelector(s);
+      const state = { courses: [], loading: false, submitting: false };
+
+      // ---------- Toast ----------
+      function toast(msg, type = 'info') {
+        const wrap = $('#toast');
+        const el = document.createElement('div');
+        el.className = `toast-item ${type}`;
+        el.textContent = msg;
+        wrap.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.3s';
+          setTimeout(() => el.remove(), 300);
+        }, 3200);
+      }
+
+      // ---------- Helpers ----------
+      function statusClass(s) {
+        return (s || '').toLowerCase().replace(/\s+/g, '-');
+      }
+      function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str == null ? '' : String(str);
+        return d.innerHTML;
+      }
+      function formatDate(d) {
+        if (!d) return '—';
+        const dt = new Date(d);
+        if (isNaN(dt)) return escapeHtml(d);
+        return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      }
+
+      function loadingBtn(btn, label) {
+        const orig = btn.dataset.label || btn.textContent;
+        btn.dataset.label = orig;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> ${label}`;
+        return () => { btn.disabled = false; btn.innerHTML = orig; };
+      }
+
+      // ---------- API ----------
+      async function apiCall(method, path, body) {
+        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(`${API_URL}${path}`, opts);
+        let data = null;
+        const text = await res.text();
+        if (text) {
+          try { data = JSON.parse(text); } catch { data = text; }
+        }
+        if (!res.ok) {
+          const msg = (data && data.message) ? data.message : (data && data.error) ? data.error : `Request failed (${res.status})`;
+          throw new Error(msg);
+        }
+        return data;
+      }
+
+      async function fetchCourses() {
+        state.loading = true;
+        renderList();
+        try {
+          const data = await apiCall('GET', '');
+          state.courses = Array.isArray(data) ? data : (data && data.courses ? data.courses : []);
+        } catch (e) {
+          state.courses = [];
+          toast(`Failed to load courses: ${e.message}`, 'error');
+          $('#courseList').innerHTML = `
+            <div class="empty">
+              <h3>Could not load courses</h3>
+              <p>${escapeHtml(e.message)}</p>
+              <p style="margin-top:0.8rem;">Make sure the API server is running at <code>${API_URL}</code></p>
+            </div>`;
+          return;
+        } finally {
+          state.loading = false;
+        }
+        renderList();
+      }
+
+      async function createCourse(payload) {
+        const data = await apiCall('POST', '', payload);
+        toast('Course added successfully', 'success');
+        await fetchCourses();
+        return data;
+      }
+
+      async function updateCourse(id, payload) {
+        const data = await apiCall('PUT', `/${id}`, payload);
+        toast('Course updated successfully', 'success');
+        await fetchCourses();
+        return data;
+      }
+
+      async function deleteCourse(id) {
+        await apiCall('DELETE', `/${id}`);
+        toast('Course removed', 'success');
+        await fetchCourses();
+      }
+
+      // ---------- Validation ----------
+      function validate(data) {
+        const errors = {};
+        if (!data.name || !data.name.trim()) errors.name = 'Course name is required';
+        if (!data.description || !data.description.trim()) errors.description = 'Description is required';
+        if (!data.target_date) errors.target_date = 'Target date is required';
+        else if (isNaN(new Date(data.target_date))) errors.target_date = 'Enter a valid date';
+        if (!data.status) errors.status = 'Please select a status';
+        return errors;
+      }
+
+      function showErrors(form, errors, prefix) {
+        form.querySelectorAll('.field').forEach(f => f.classList.remove('invalid'));
+        form.querySelectorAll('.err-text').forEach(s => s.textContent = '');
+        Object.entries(errors).forEach(([key, msg]) => {
+          const span = form.querySelector(`[data-err="${prefix}${key}"]`);
+          if (span) {
+            span.textContent = msg;
+            span.closest('.field').classList.add('invalid');
+          }
+        });
+      }
+
+      function collectForm(form) {
+        return {
+          name: form.name.value,
+          description: form.description.value,
+          target_date: form.target_date.value,
+          status: form.status.value,
+        };
+      }
+
+      // ---------- Render ----------
+      function renderList() {
+        const list = $('#courseList');
+        const label = $('#countLabel');
+        if (state.loading) {
+          list.innerHTML = `<div class="loading-overlay"><span class="spinner dark"></span> Loading courses…</div>`;
+          label.textContent = '';
+          return;
+        }
+        if (!state.courses.length) {
+          list.innerHTML = `
+            <div class="empty">
+              <h3>No courses yet</h3>
+              <p>Add your first course using the form above.</p>
+            </div>`;
+          label.textContent = '';
+          return;
+        }
+        label.textContent = `(${state.courses.length})`;
+        list.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Target Date</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${state.courses.map(c => `
+                  <tr data-id="${escapeHtml(c.id)}">
+                    <td class="name">${escapeHtml(c.name)}</td>
+                    <td class="desc">${escapeHtml(c.description)}</td>
+                    <td>${formatDate(c.target_date)}</td>
+                    <td><span class="badge ${statusClass(c.status)}">${escapeHtml(c.status || '—')}</span></td>
+                    <td>${formatDate(c.created_at)}</td>
+                    <td class="actions">
+                      <button class="btn-ghost btn-sm" data-action="edit">Edit</button>
+                      <button class="btn-danger btn-sm" data-action="delete">Remove</button>
+                    </td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+      }
+
+      // ---------- Add form ----------
+      const addForm = $('#courseForm');
+      addForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = collectForm(addForm);
+        const errors = validate(data);
+        if (Object.keys(errors).length) {
+          showErrors(addForm, errors, '');
+          toast('Please fix the highlighted fields', 'error');
+          return;
+        }
+        showErrors(addForm, {}, '');
+        const btn = $('#submitBtn');
+        const done = loadingBtn(btn, 'Adding…');
+        try {
+          await createCourse(data);
+          addForm.reset();
+        } catch (err) {
+          toast(`Failed to add course: ${err.message}`, 'error');
+        } finally {
+          done();
+        }
+      });
+      addForm.addEventListener('reset', () => showErrors(addForm, {}, ''));
+
+      // ---------- List interactions ----------
+      $('#courseList').addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const row = btn.closest('tr');
+        const id = row.dataset.id;
+        const course = state.courses.find(c => String(c.id) === String(id));
+        if (!course) return;
+
+        if (btn.dataset.action === 'edit') {
+          openEditModal(course);
+        } else if (btn.dataset.action === 'delete') {
+          if (!confirm(`Remove "${course.name}"? This cannot be undone.`)) return;
+          const done = loadingBtn(btn, 'Removing…');
+          try {
+            await deleteCourse(id);
+          } catch (err) {
+            toast(`Failed to remove course: ${err.message}`, 'error');
+            done();
+          }
+        }
+      });
+
+      // ---------- Edit modal ----------
+      const editModal = $('#editModal');
+      const editForm = $('#editForm');
+
+      function openEditModal(course) {
+        $('#e-id').value = course.id;
+        $('#e-name').value = course.name || '';
+        $('#e-desc').value = course.description || '';
+        $('#e-date').value = course.target_date || '';
+        $('#e-status').value = course.status || 'Not Started';
+        showErrors(editForm, {}, 'e');
+        editModal.classList.add('open');
+        setTimeout(() => $('#e-name').focus(), 50);
+      }
+      function closeEditModal() { editModal.classList.remove('open'); }
+      $('#modalClose').addEventListener('click', closeEditModal);
+      $('#cancelBtn').addEventListener('click', closeEditModal);
+      editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEditModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && editModal.classList.contains('open')) closeEditModal(); });
+
+      editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = $('#e-id').value;
+        const data = {
+          name: $('#e-name').value,
+          description: $('#e-desc').value,
+          target_date: $('#e-date').value,
+          status: $('#e-status').value,
+        };
+        const errors = validate(data);
+        if (Object.keys(errors).length) {
+          showErrors(editForm, errors, 'e');
+          toast('Please fix the highlighted fields', 'error');
+          return;
+        }
+        showErrors(editForm, {}, 'e');
+        const btn = $('#saveBtn');
+        const done = loadingBtn(btn, 'Saving…');
+        try {
+          await updateCourse(id, data);
+          closeEditModal();
+        } catch (err) {
+          toast(`Failed to update course: ${err.message}`, 'error');
+        } finally {
+          done();
+        }
+      });
+
+      // ---------- Init ----------
+      fetchCourses();
+    </script>
+  </body>
+</html>
